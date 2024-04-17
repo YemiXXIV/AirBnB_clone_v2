@@ -117,58 +117,79 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, arg):
+    def do_create(self, args):
+        """ 
+        Create an object of any class
         """
-        Create a new object of the specified class with given parameters
-        """
-        args_list = arg.split()
+        class_name = ''
+        obj_kwargs = {}
 
-        if len(args_list) < 2:
-            print("** Missing class name or parameters **")
+        # Regular expression pattern to match class name
+        name_pattern = r'(?P<name>(?:[a-zA-Z]|_)(?:[a-zA-Z]|\d|_)*)'
+        class_match = re.match(name_pattern, args)
+
+        if class_match is not None:
+            class_name = class_match.group('name')
+            params_str = args[len(class_name):].strip()
+            params = params_str.split(' ')
+        
+            # Regular expression patterns for string, float, and integer values
+            str_pattern = r'(?P<t_str>"([^"]|\")*")'
+            float_pattern = r'(?P<t_float>[-+]?\d+\.\d+)'
+            int_pattern = r'(?P<t_int>[-+]?\d+)'
+            param_pattern = '{}=({}|{}|{})'.format(
+                name_pattern,
+                str_pattern,
+                float_pattern,
+                int_pattern
+            )
+        
+            for param in params:
+                param_match = re.fullmatch(param_pattern, param)
+                if param_match is not None:
+                    key_name = param_match.group('name')
+                    str_v = param_match.group('t_str')
+                    float_v = param_match.group('t_float')
+                    int_v = param_match.group('t_int')
+                
+                    # Based on the matched pattern, assign the appropriate value to the key
+                    if float_v is not None:
+                        obj_kwargs[key_name] = float(float_v)
+                    elif int_v is not None:
+                        obj_kwargs[key_name] = int(int_v)
+                    elif str_v is not None:
+                        obj_kwargs[key_name] = str_v[1:-1].replace('_', ' ')
+
+        else:
+            class_name = args
+    
+        # Check if class_name is provided
+        if not class_name:
+            print("** class name missing **")
             return
-
-        class_name = args_list[0]
-
-        if class_name not in self.classes:
-            print("** Class doesn't exist **")
+        # Check if class_name exists in the classes dictionary
+        elif class_name not in HBNBCommand.classes:
+            print("** class doesn't exist **")
             return
-
-        kwargs = {}
-
-        for param in args_list[1:]:
-            key_value = param.split('=')
-            if len(key_value) != 2:
-                print("** Invalid parameter format: {} **".format(param))
-                continue
-
-            key, value = key_value  # Split each parameter by '=' to extract key and value
-
-            # Process value based on its syntax
-            if value.startswith('"') and value.endswith('"'):
-                value = value[1:-1].replace('_', ' ')
-            elif '.' in value:
-                # Float value
-                value = float(value)
-            else:
-                # Integer value
-                try:
-                    value = int(value)
-                except ValueError:
-                    print("** Invalid parameter value: {} **".format(param))
-                    continue
-
-            # Add key-value pair to the kwargs dictionary
-            kwargs[key] = value
-
-            # Ensure 'updated_at' is included in kwargs and set it to current datetime if not provided
-            if 'updated_at' not in kwargs:
-                kwargs['updated_at'] = datetime.now()
-
-            # Create an instance of the specified class with the parsed parameters
-            new_instance = self.classes[class_name](**kwargs)
-            storage.save()
+    
+        # Create new instance based on storage type
+        if os.getenv('HBNB_TYPE_STORAGE') == 'db':
+            if 'id' not in obj_kwargs:
+                obj_kwargs['id'] = str(uuid.uuid4())
+            if 'created_at' not in obj_kwargs:
+                obj_kwargs['created_at'] = str(datetime.now())
+            if 'updated_at' not in obj_kwargs:
+                obj_kwargs['updated_at'] = str(datetime.now())
+            new_instance = HBNBCommand.classes[class_name](**obj_kwargs)
+            new_instance.save()
             print(new_instance.id)
-            print(new_instance.to_dict())
+        else:
+            new_instance = HBNBCommand.classes[class_name]()
+            for key, value in obj_kwargs.items():
+                if key not in ('id', 'created_at', 'updated_at'):
+                    setattr(new_instance, key, value)
+            new_instance.save()
+            print(new_instance.id)
 
     def help_create(self):
         """ Help information for the create method """
