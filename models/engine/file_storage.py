@@ -26,23 +26,30 @@ class FileStorage:
 
 
     def new(self, obj):
-        """Set in __objects obj with key <obj_class_name>.id."""
-        self.__objects["{}.{}".format(type(obj).__name__, obj.id)] = obj
+        """
+        Sets in __objects the obj with key <obj class name>.id.
+        """
+        key = obj.__class__.__name__ + "." + obj.id
+        FileStorage.__objects[key] = obj
 
     def save(self):
-        """Serialize __objects to the JSON file __file_path."""
-        open_dict = {o: self.__objects[o].to_dict() for o in self.__objects.keys()}
-        with open(self.__file_path, "w", encoding="utf-8") as f:
-            json.dump(open_dict, f)
+        """
+        Serializes __objects to the JSON file (path: __file_path).
+        """
+        serialized = {k: v.to_dict() for k, v in FileStorage.__objects.items()}
+        with open(FileStorage.__file_path, "w") as f:
+            json.dump(serialized, f)
 
     def reload(self):
-        """Deserialize the JSON file __file_path to __objects, if it exists."""
+        """Deserializes the JSON file to __objects."""
         try:
-            with open(self.__file_path, "r", encoding="utf-8") as f:
-                for o in json.load(f).values():
-                    name = o["__class__"]
-                    del o["__class__"]
-                    self.new(eval(name)(**o))
+            with open(FileStorage.__file_path, "r") as f:
+                deserialized = json.load(f)
+                for key, value in deserialized.items():
+                    cls_name, obj_id = key.split(".")
+                    cls = eval(cls_name)
+                    obj = cls(**value)
+                    FileStorage.__objects[key] = obj
         except FileNotFoundError:
             pass
 
