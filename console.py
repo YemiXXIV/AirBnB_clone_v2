@@ -117,55 +117,58 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class"""
-        if not args:
-            print("** class name missing **")
-            return
-
+    def do_create(self, arg):
+        """
+        Create a new object of the specified class with given parameters
+        """
         args_list = arg.split()
 
-        class_name = args_list[0]  # Extract class name
-        if class_name not in self.classes:
-            print("** class doesn't exist **")
+        if len(args_list) < 2:
+            print("** Missing class name or parameters **")
             return
 
-    # Initialize empty dictionary to store attribute key-value pairs
-    kwargs = {}
+        class_name = args_list[0]
 
-    # Loop through the remaining arguments to parse attribute key-val
-    for param in args_list[1:]:
-        # Split each parameter by '=' to extract key and value
-        parts = param.split('=')
-        if len(parts) != 2:
-            print(f"Skipping invalid parameter: {param}")
-            continue
+        if class_name not in self.classes:
+            print("** Class doesn't exist **")
+            return
 
-        key, value = parts
+        kwargs = {}
 
-        # Process value based on its syntax
-        if value.startswith('"') and value.endswith('"'):
-            # String value
-            value = value[1:-1].replace('_', ' ')
-        elif '.' in value:
-            # Float value
-            try:
+        for param in args_list[1:]:
+            key_value = param.split('=')
+            if len(key_value) != 2:
+                print("** Invalid parameter format: {} **".format(param))
+                continue
+
+            key, value = key_value  # Split each parameter by '=' to extract key and value
+
+            # Process value based on its syntax
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1].replace('_', ' ')
+            elif '.' in value:
+                # Float value
                 value = float(value)
-            except ValueError:
-                print(f"Skipping invalid float value: {value}")
-                continue
-        else:
-            # Integer value
-            try:
-                value = int(value)
-            except ValueError:
-                print(f"Skipping invalid integer value: {value}")
-                continue
-        kwargs[key] = value
+            else:
+                # Integer value
+                try:
+                    value = int(value)
+                except ValueError:
+                    print("** Invalid parameter value: {} **".format(param))
+                    continue
 
-    # Create instance of the specified class with the parsed param        new_instance = self.classes[class_name](**kwargs)
-    storage.save()
-    print(new_instance.id) 
+            # Add key-value pair to the kwargs dictionary
+            kwargs[key] = value
+
+            # Ensure 'updated_at' is included in kwargs and set it to current datetime if not provided
+            if 'updated_at' not in kwargs:
+                kwargs['updated_at'] = datetime.now()
+
+            # Create an instance of the specified class with the parsed parameters
+            new_instance = self.classes[class_name](**kwargs)
+            storage.save()
+            print(new_instance.id)
+            print(new_instance.to_dict())
 
     def help_create(self):
         """ Help information for the create method """
@@ -360,6 +363,7 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
