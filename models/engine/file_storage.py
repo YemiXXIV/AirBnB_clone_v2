@@ -16,15 +16,14 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
-        if cls is not None:
-            if type(cls) == str:
-                cls = eval(cls)
-            cls_dict = {}
-            for k, v in self.__objects.items():
-                if type(v) == cls:
-                    cls_dict[k] = v
-            return cls_dict
-        return self.__objects
+        """
+        Returns a dict of objects that are instantiated
+        """
+        if cls is None:
+            return FileStorage.__objects
+        else:
+            return {k: v for k, v in FileStorage.__objects.items() if isinstance(v, cls)}
+
 
     def new(self, obj):
         """Set in __objects obj with key <obj_class_name>.id."""
@@ -49,10 +48,10 @@ class FileStorage:
 
     def delete(self, obj=None):
         """Delete a given object from __objects, if it exists."""
-        try:
-            del self.__objects["{}.{}".format(type(obj).__name__, obj.id)]
-        except (AttributeError, KeyError):
-            pass
+        if obj is not None:
+            key = "{}.{}".format(obj.__class__.__name__, obj.id)
+            if key in FileStorage.__objects:
+                del FileStorage.__objects[key]
 
     def close(self):
         """Call the reload method."""
