@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 import uuid
 from models.base_model import BaseModel
-from models.__init__ import storage
+from models import storage
 from models.user import User
 from models.place import Place
 from models.state import State
@@ -17,9 +17,9 @@ from models.review import Review
 
 
 class HBNBCommand(cmd.Cmd):
-    """ Contains the functionality for the HBNB console"""
-
-    # determines prompt for interactive/non-interactive modes
+    """ 
+    Contains the functionality for the HBNB console
+    """
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
 
     classes = {
@@ -40,12 +40,10 @@ class HBNBCommand(cmd.Cmd):
             print('(hbnb)')
 
     def precmd(self, line):
-        """Reformat command line for advanced command syntax.
-
-        Usage: <class name>.<command>([<id> [<*args> or <**kwargs>]])
-        (Brackets denote optional fields in usage example.)
         """
-        _cmd = _cls = _id = _args = ''  # initialize line elements
+        Reformat command line for advanced command syntax.
+        """
+        _cmd = _cls = _id = _args = ''
 
         # scan for general formating - i.e '.', '(', ')'
         if not ('.' in line and '(' in line and ')' in line):
@@ -271,12 +269,12 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
-                    print_list.append(str(v))
+
+            class_instances = storage.all(HBNBCommand.classes[args])
+            print_list = [str(obj) for obj in class_instances.values()]
         else:
-            for k, v in storage._FileStorage__objects.items():
-                print_list.append(str(v))
+            all_instances = storage.all()
+            print_list = [str(obj) for obj in all_instances.values()]
 
         print(print_list)
 
