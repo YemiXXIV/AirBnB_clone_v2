@@ -10,7 +10,9 @@ env.hosts = ['52.87.220.178', '54.209.217.90']
 
 
 def do_deploy(archive_path):
-    """distributes an archive to the web servers"""
+    """
+    distributes an archive to the web servers
+    """
     if exists(archive_path) is False:
         return False
     try:
@@ -26,7 +28,7 @@ def do_deploy(archive_path):
         run('rm -rf /data/web_static/current')
         run('ln -s {}{}/ /data/web_static/current'.format(path, no_ext))
         return True
-    except:
-        return False
 
-    
+    except Exception as e:
+        print("An error has occured:", e)
+        return False
