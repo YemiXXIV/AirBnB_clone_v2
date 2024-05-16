@@ -1,9 +1,7 @@
 #!/usr/bin/python3
 """
-This Fabric script based on the file 2-do_deploy_web_static.py that creates and
-distributes an archive to the web servers
-
-execute: fab -f 3-deploy_web_static.py deploy -i ~/.ssh/id_rsa -u ubuntu
+This Fabric script based on the file 2-do_deploy_web_static.py that
+creates and distributes an archive to the web servers
 """
 
 from fabric.api import env, local, put, run
@@ -13,7 +11,9 @@ env.hosts = ['52.87.220.178', '54.209.217.90']
 
 
 def do_pack():
-    """generates a tgz archive"""
+    """
+    generates a tgz archive
+    """
     try:
         date = datetime.now().strftime("%Y%m%d%H%M%S")
         if isdir("versions") is False:
@@ -21,12 +21,16 @@ def do_pack():
         file_name = "versions/web_static_{}.tgz".format(date)
         local("tar -cvzf {} web_static".format(file_name))
         return file_name
-    except:
+
+    except Exception as e:
+        print("An error has occured:", e)
         return None
 
 
 def do_deploy(archive_path):
-    """distributes an archive to the web servers"""
+    """
+    distributes an archive to the web servers
+    """
     if exists(archive_path) is False:
         return False
     try:
@@ -42,12 +46,16 @@ def do_deploy(archive_path):
         run('rm -rf /data/web_static/current')
         run('ln -s {}{}/ /data/web_static/current'.format(path, no_ext))
         return True
-    except:
+
+    except Exception as e:
+        print("An error has occured:", e)
         return False
 
 
 def deploy():
-    """creates and distributes an archive to the web servers"""
+    """
+    creates and distributes an archive to the web servers
+    """
     archive_path = do_pack()
     if archive_path is None:
         return False
