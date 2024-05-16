@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
-This Fabric script is based on the file 1-pack_web_static.py that distributes an
-archive to the web servers
+This Fabric script is based on the file 1-pack_web_static.py that
+distributes an archive to the web servers
 """
 
 from fabric.api import put, run, env
@@ -28,3 +28,5 @@ def do_deploy(archive_path):
         return True
     except:
         return False
+
+    
