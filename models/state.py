@@ -10,13 +10,14 @@ STORAGE = getenv("HBNB_TYPE_STORAGE")
 
 
 class State(BaseModel, Base):
-    """ 
-    State class 
+    """
+    State class
     """
     __tablename__ = 'states'
     if STORAGE == "db":
         name = Column(String(128), nullable=False)
-        cities = relationship("City", backref="states", cascade="all, delete-orphan")
+        cities = relationship("City", backref="states",
+                              cascade="all, delete-orphan")
 
         # Define a property to retrieve cities associated with the state
         @property

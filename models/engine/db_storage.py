@@ -49,7 +49,7 @@ class DBStorage:
         if not self.__session:
             self.reload()
         objects = {}
-        if type(cls) == str:
+        if type(cls) is str:
             cls = name_class.get(cls, None)
         if cls:
             for obj in self.__session.query(cls):
@@ -113,7 +113,7 @@ class DBStorage:
         Count number of objects in the Database Storage
         """
         total = 0
-        if type(cls) == str and cls in name_class:
+        if type(cls) is str and cls in name_class:
             cls = name_class[cls]
             total = self.__session.query(cls).count()
         elif cls is None:
