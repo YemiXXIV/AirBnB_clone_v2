@@ -10,8 +10,8 @@ STORAGE = getenv("HBNB_TYPE_STORAGE")
 
 
 class Place(BaseModel, Base):
-    """ 
-    A place to stay 
+    """
+    A place to stay
     """
     __tablename__ = 'places'
     if STORAGE == "db":
@@ -28,9 +28,16 @@ class Place(BaseModel, Base):
         reviews = relationship('Review',
                                backref='place',
                                cascade="all, delete")
+        place_amenity = Table('place_amenity', Base.metadata,
+                              Column('place_id', String(60),
+                                     ForeignKey('places.id'),
+                                     primary_key=True, nullable=False),
+                              Column('amenity_id', String(60),
+                                     ForeignKey('amenities.id'),
+                                     primary_key=True, nullable=False))
 
-        amenities = relationship('Amenity', secondary='place_amenities',
-                                 viewonly=False)
+        amenities = relationship('Amenity', secondary='place_amenity',
+                                 viewonly=False, backref="places")
     else:
         city_id = ""
         user_id = ""
@@ -69,5 +76,5 @@ class Place(BaseModel, Base):
         def amenities(self, value):
             from models import storage
             from models.amenity import Amenity
-            if type(value) == Amenity:
+            if type(value) is Amenity:
                 self.amenity_ids.append(value.id)
