@@ -11,7 +11,9 @@ from models.user import User
 
 
 class FileStorage:
-    """This class manages storage of hbnb models in JSON format"""
+    """
+    This class manages storage of hbnb models in JSON format
+    """
     __file_path = 'file.json'
     __objects = {}
 
@@ -41,7 +43,9 @@ class FileStorage:
             json.dump(serialized, f)
 
     def reload(self):
-        """Deserializes the JSON file to __objects."""
+        """
+        Deserializes the JSON file to __objects.
+        """
         try:
             with open(FileStorage.__file_path, "r") as f:
                 deserialized = json.load(f)
@@ -54,12 +58,16 @@ class FileStorage:
             pass
 
     def delete(self, obj=None):
-        """Delete a given object from __objects, if it exists."""
+        """
+        Delete a given object from __objects, if it exists.
+        """
         if obj is not None:
             key = "{}.{}".format(obj.__class__.__name__, obj.id)
             if key in FileStorage.__objects:
                 del FileStorage.__objects[key]
 
     def close(self):
-        """Call the reload method."""
+        """
+        Calls the reload method.
+        """
         self.reload()
