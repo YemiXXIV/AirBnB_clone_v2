@@ -3,7 +3,8 @@
 """
 
 import os
-from models.base_model import Base
+import models
+from models.base_model import Base, BaseModel
 from models.amenity import Amenity
 from models.city import City
 from models.place import Place
@@ -12,6 +13,7 @@ from models.review import Review
 from models.user import User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
+
 name_class = {
     'Amenity': Amenity,
     'City': City,
@@ -46,28 +48,24 @@ class DBStorage:
         """
         returns a dictionary of all the objects present
         """
-        if not self.__session:
-            self.reload()
         objects = {}
-        if type(cls) is str:
-            cls = name_class.get(cls, None)
-        if cls:
-            for obj in self.__session.query(cls):
-                objects[obj.__class__.__name__ + '.' + obj.id] = obj
-        else:
-            for cls in name_class.values():
-                for obj in self.__session.query(cls):
-                    objects[obj.__class__.__name__ + '.' + obj.id] = obj
-        return objects
+        for clss in classes:
+            if cls is None or cls is classes[clss] or cls is clss:
+                objs = self.__session.query(classes[clss]).all()
+                for obj in objs:
+                    key = obj.__class__.name__ + '.' + obj.id
+                    objects[key] = obj
+        return (objects)
 
     def reload(self):
         """
         reloads objects from the Database Storage
         """
+        Base.metadata.create_all(self.__engine)
         session_factory = sessionmaker(bind=self.__engine,
                                        expire_on_commit=False)
-        Base.metadata.create_all(self.__engine)
-        self.__session = scoped_session(session_factory)
+        Session = scoped_session(session_factory)
+        self.__session = Session
 
     def new(self, obj):
         """
@@ -85,9 +83,7 @@ class DBStorage:
         """
         deletes an object
         """
-        if not self.__session:
-            self.reload()
-        if obj:
+        if obj is not None:
             self.__session.delete(obj)
 
     def close(self):
