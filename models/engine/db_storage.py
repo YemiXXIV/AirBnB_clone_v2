@@ -48,24 +48,28 @@ class DBStorage:
         """
         returns a dictionary of all the objects present
         """
+        if not self.__session:
+            self.reload()
         objects = {}
-        for clss in classes:
-            if cls is None or cls is classes[clss] or cls is clss:
-                objs = self.__session.query(classes[clss]).all()
-                for obj in objs:
-                    key = obj.__class__.name__ + '.' + obj.id
-                    objects[key] = obj
+        if type(cls) == str:
+            cls = name2class.get(cls, None)
+        if cls:
+            for obj in self.__session.query(cls):
+                objects[obj.__class__.__name__ + '.' + obj.id] = obj
+        else:
+            for cls in name2class.values():
+                for obj in self.__session.query(cls):
+                    objects[obj.__class__.__name__ + '.' + obj.id] = obj
         return (objects)
 
     def reload(self):
         """
         reloads objects from the Database Storage
         """
-        Base.metadata.create_all(self.__engine)
         session_factory = sessionmaker(bind=self.__engine,
                                        expire_on_commit=False)
-        Session = scoped_session(session_factory)
-        self.__session = Session
+        Base.metadata.create_all(self.__engine)
+        self.__session = scoped_session(session_factory)
 
     def new(self, obj):
         """
@@ -115,4 +119,4 @@ class DBStorage:
         elif cls is None:
             for cls in name_class.values():
                 total += self.__session.query(cls).count()
-        return total
+        return (total)

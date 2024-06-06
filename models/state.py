@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 """ State Module for our HBNB project """
-import models
 from models.base_model import BaseModel, Base
 from models.city import City
-import sqlalchemy
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from os import getenv
 
@@ -18,8 +16,10 @@ class State(BaseModel, Base):
     __tablename__ = 'states'
     if STORAGE == "db":
         name = Column(String(128), nullable=False)
-        cities = relationship("City", backref="states",
+        cities = relationship('City', backref='states',
                               cascade="all, delete-orphan")
+    else:
+        name = ""
 
         # Define a property to retrieve cities associated with the state
         @property

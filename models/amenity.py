@@ -16,9 +16,8 @@ class Amenity(BaseModel, Base):
     __tablename__ = "amenities"
     if STORAGE == "db":
         name = Column(String(128), nullable=False)
-        place_amenities = Table('place_amenities', Base.metadata,
-                            Column('amenity_id', String(60), ForeignKey('amenities.id'),
-                                   primary_key=True, nullable=False),
-                            Column('place_id', String(60), ForeignKey('places.id'),
-                                   primary_key=True, nullable=False)
-                            )
+        place_amenities = relationship(
+            'Place', secondary=Place.place_amenity)
+
+    else:
+        name = ""
