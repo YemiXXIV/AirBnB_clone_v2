@@ -4,7 +4,7 @@ A route to the /states_list
 """
 from flask import Flask, render_template
 from models import storage
-from models.state import State
+from models import *
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -23,8 +23,9 @@ def states_list():
     """
     A route to /states_list
     """
-    Data = sorted(storage.all(State).values(), key=lambda state: state.name)
-    return render_template("7-states_list.html", states=Data)
+    Data = sorted(list(storage.all("State").values()),
+                  key=lambda x: x.name)
+    return render_template('7-states_list.html', states=Data)
 
 
 if __name__ == "__main__":
