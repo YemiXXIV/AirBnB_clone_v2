@@ -3,8 +3,7 @@
 """
 
 import os
-import models
-from models.base_model import Base, BaseModel
+from models.base_model import Base
 from models.amenity import Amenity
 from models.city import City
 from models.place import Place
@@ -87,7 +86,9 @@ class DBStorage:
         """
         deletes an object
         """
-        if obj is not None:
+        if not self.__session:
+            self.reload()
+        if obj:
             self.__session.delete(obj)
 
     def close(self):
