@@ -11,7 +11,7 @@ STORAGE = getenv("HBNB_TYPE_STORAGE")
 
 class Place(BaseModel, Base):
     """
-    A place to stay
+    A place to stay in
     """
     __tablename__ = 'places'
     if STORAGE == "db":

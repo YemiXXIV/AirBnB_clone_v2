@@ -23,11 +23,11 @@ class FileStorage:
         Returns a dict of instatiated objects
         """
         if cls is not None:
-            if type(cls) == str:
+            if type(cls) is str:
                 cls = eval(cls)
             cls_dict = {}
             for k, v in self.__objects.items():
-                if type(v) == cls:
+                if type(v) is cls:
                     cls_dict[k] = v
             return cls_dict
         return self.__objects

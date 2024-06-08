@@ -17,7 +17,7 @@ from models.review import Review
 
 
 class HBNBCommand(cmd.Cmd):
-    """ 
+    """
     Contains the functionality for the HBNB console
     """
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
@@ -89,17 +89,23 @@ class HBNBCommand(cmd.Cmd):
             return line
 
     def postcmd(self, stop, line):
-        """Prints if isatty is false"""
+        """
+        Prints if isatty is false
+        """
         if not sys.__stdin__.isatty():
             print('(hbnb) ', end='')
         return stop
 
     def do_quit(self, command):
-        """ Method to exit the HBNB console"""
+        """
+        Method to exit the HBNB console
+        """
         exit()
 
     def help_quit(self):
-        """ Prints the help documentation for quit  """
+        """
+        Prints the help documentation for quit
+        """
         print("Exits the program with formatting\n")
 
     def do_EOF(self, arg):
@@ -108,15 +114,19 @@ class HBNBCommand(cmd.Cmd):
         exit()
 
     def help_EOF(self):
-        """ Prints the help documentation for EOF """
+        """
+        Prints the help documentation for EOF
+        """
         print("Exits the program without formatting\n")
 
     def emptyline(self):
-        """ Overrides the emptyline method of CMD """
+        """
+        Overrides the emptyline method of CMD
+        """
         pass
 
     def do_create(self, args):
-        """ 
+        """
         Create an object of any class
         """
         class_name = ''
@@ -130,7 +140,7 @@ class HBNBCommand(cmd.Cmd):
             class_name = class_match.group('name')
             params_str = args[len(class_name):].strip()
             params = params_str.split(' ')
-        
+
             # Regular expression patterns for string, float, and integer values
             str_pattern = r'(?P<t_str>"([^"]|\")*")'
             float_pattern = r'(?P<t_float>[-+]?\d+\.\d+)'
@@ -141,7 +151,7 @@ class HBNBCommand(cmd.Cmd):
                 float_pattern,
                 int_pattern
             )
-        
+
             for param in params:
                 param_match = re.fullmatch(param_pattern, param)
                 if param_match is not None:
@@ -149,8 +159,8 @@ class HBNBCommand(cmd.Cmd):
                     str_v = param_match.group('t_str')
                     float_v = param_match.group('t_float')
                     int_v = param_match.group('t_int')
-                
-                    # Based on the matched pattern, assign the appropriate value to the key
+
+        # Based on the matched pattern,assign the appropriate value to the key
                     if float_v is not None:
                         obj_kwargs[key_name] = float(float_v)
                     elif int_v is not None:
@@ -160,8 +170,8 @@ class HBNBCommand(cmd.Cmd):
 
         else:
             class_name = args
-    
-        # Check if class_name is provided
+
+            # Check if class_name is provided
         if not class_name:
             print("** class name missing **")
             return
@@ -169,7 +179,7 @@ class HBNBCommand(cmd.Cmd):
         elif class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-    
+
         # Create new instance based on storage type
         if os.getenv('HBNB_TYPE_STORAGE') == 'db':
             if 'id' not in obj_kwargs:
@@ -190,12 +200,16 @@ class HBNBCommand(cmd.Cmd):
             print(new_instance.id)
 
     def help_create(self):
-        """ Help information for the create method """
+        """
+        Help information for the create method
+        """
         print("Creates a class of any type")
         print("[Usage]: create <className>\n")
 
     def do_show(self, args):
-        """ Method to show an individual object """
+        """
+        Method to show an individual object
+        """
         new = args.partition(" ")
         c_name = new[0]
         c_id = new[2]
@@ -218,7 +232,7 @@ class HBNBCommand(cmd.Cmd):
 
         key = c_name + "." + c_id
         try:
-            print(storage._FileStorage__objects[key])
+            print(storage.all()[key])
         except KeyError:
             print("** no instance found **")
 
@@ -250,7 +264,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            storage.delete(storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -269,12 +283,12 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-
-            class_instances = storage.all(HBNBCommand.classes[args])
-            print_list = [str(obj) for obj in class_instances.values()]
+            for k, v in storage.all().items():
+                if k.split('.')[0] == args:
+                    print_list.append(str(v))
         else:
-            all_instances = storage.all()
-            print_list = [str(obj) for obj in all_instances.values()]
+            for k, v in storage.all().items():
+                print_list.append(str(v))
 
         print(print_list)
 
@@ -286,7 +300,7 @@ class HBNBCommand(cmd.Cmd):
     def do_count(self, args):
         """Count current number of class instances"""
         count = 0
-        for k, v in storage._FileStorage__objects.items():
+        for k, v in storage.all().items():
             if args == k.split('.')[0]:
                 count += 1
         print(count)
@@ -329,13 +343,13 @@ class HBNBCommand(cmd.Cmd):
         # first determine if kwargs or args
         if '{' in args[2] and '}' in args[2] and type(eval(args[2])) is dict:
             kwargs = eval(args[2])
-            args = []  # reformat kwargs into list, ex: [<name>, <value>, ...]
+            args = []
             for k, v in kwargs.items():
                 args.append(k)
                 args.append(v)
         else:  # isolate args
             args = args[2]
-            if args and args[0] == '\"':  # check for quoted arg
+            if args and args[0] == '\"':
                 second_quote = args.find('\"', 1)
                 att_name = args[1:second_quote]
                 args = args[second_quote + 1:]
@@ -376,7 +390,7 @@ class HBNBCommand(cmd.Cmd):
                 # update dictionary with name, value pair
                 new_dict.__dict__.update({att_name: att_val})
 
-        new_dict.save()  # save updates to file
+        new_dict.save()
 
     def help_update(self):
         """ Help information for the update class """

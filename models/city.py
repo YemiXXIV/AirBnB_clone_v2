@@ -14,8 +14,8 @@ class City(BaseModel, Base):
     # Check the storage type
     if STORAGE == "db":
         # Define columns for the database storage
-        name = Column(String(128), nullable=False)
         state_id = Column(String(60), ForeignKey('states.id'), nullable=False)
+        name = Column(String(128), nullable=False)
         # Define relationship with Place class
         places = relationship('Place',
                               backref='cities',
