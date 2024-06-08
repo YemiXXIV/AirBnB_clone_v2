@@ -17,8 +17,7 @@ def close_db(exception):
 @app.route("/states_list")
 def states_list():
     """A route to /states_list"""
-    data = sorted(storage.all(State).values(),
-                  key=lambda state: state.name)
+    data = sorted(storage.all(State).values(), key=lambda state: state.name)
     return render_template("7-states_list.html", states=data)
 
 
