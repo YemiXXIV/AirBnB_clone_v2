@@ -18,7 +18,8 @@ def states_list():
     """
     List all states
     """
-    Data = sorted(storage.all(State).values(), key=lambda state: state.name)
+    Data = sorted(storage.all(State).values(),
+                  key=lambda state: state.name)
     return render_template("9-states.html", states=Data)
 
 
